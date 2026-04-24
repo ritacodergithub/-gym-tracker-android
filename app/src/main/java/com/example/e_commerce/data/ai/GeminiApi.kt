@@ -15,7 +15,10 @@ interface GeminiApi {
 
     @POST("v1beta/models/{model}:generateContent")
     suspend fun generate(
-        @Path("model") model: String = "gemini-2.0-flash",
+        // gemini-1.5-flash-8b has the most generous free-tier quota
+        // (4M tokens/min, 1500 requests/day) and its own rate-limit pool,
+        // so it stays usable even when heavier models are throttled.
+        @Path("model") model: String = "gemini-1.5-flash-8b",
         @Query("key") apiKey: String,
         @Body body: GenerateRequest
     ): GenerateResponse

@@ -81,9 +81,8 @@ class AiCoachRepository {
             if (text.isBlank()) Outcome.Error("Empty response from Gemini")
             else Outcome.Success(text)
         } catch (http: retrofit2.HttpException) {
-            // Translate common HTTP failures into human-readable messages.
             val message = when (http.code()) {
-                429 -> "Rate limit hit. Wait about a minute and try again — Gemini's free tier caps at 15 requests/min."
+                429 -> "Free-tier rate limit. This usually clears in 60 seconds — if it keeps happening, you may have hit today's daily quota. Try again tomorrow or add billing in Google AI Studio."
                 400 -> "Bad request (400). Often means the prompt or API version is off."
                 401, 403 -> "Key rejected (${http.code()}). Check that your Gemini key is active in AI Studio."
                 503 -> "Gemini is overloaded right now. Try again in a moment."
