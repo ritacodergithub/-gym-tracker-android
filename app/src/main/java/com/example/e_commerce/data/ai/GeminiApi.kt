@@ -15,12 +15,14 @@ interface GeminiApi {
 
     @POST("v1beta/models/{model}:generateContent")
     suspend fun generate(
-        // gemini-1.5-flash is universally available at the v1beta endpoint
-        // and has its own free-tier rate-limit pool (15 RPM, 1500 RPD).
-        // Separate quota from gemini-2.0-flash — good fallback when 2.0 is
-        // throttled. Swap to "gemini-2.0-flash" or "gemini-1.5-pro" here
-        // if your account/region supports them.
-        @Path("model") model: String = "gemini-1.5-flash",
+        // `gemini-flash-latest` is a Google-maintained alias that always
+        // points to the current stable Flash model. Safer than hardcoding
+        // a specific version since minor releases get deprecated every
+        // ~6 months. Concrete alternatives if this ever 404s:
+        //   "gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"
+        // Discover what your key can use:
+        //   GET https://generativelanguage.googleapis.com/v1beta/models?key=<K>
+        @Path("model") model: String = "gemini-flash-latest",
         @Query("key") apiKey: String,
         @Body body: GenerateRequest
     ): GenerateResponse
