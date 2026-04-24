@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -56,6 +58,7 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(state.done) { if (state.done) onFinished() }
 
@@ -91,6 +94,31 @@ fun OnboardingScreen(
                 HeroTitle()
 
                 Spacer(Modifier.height(16.dp))
+
+                // Optional: sign in with Google to pre-fill name + email.
+                // Falls back gracefully if Firebase isn't configured.
+                GradientButton(
+                    text = "Continue with Google",
+                    icon = Icons.Default.AccountCircle,
+                    gradient = Gradients.Cool,
+                    onClick = { viewModel.signInWithGoogle(context) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                state.authMessage?.let { msg ->
+                    Text(
+                        msg,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = NeonCyan,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                Text(
+                    "— or fill in below —",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = TextSecondary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
 
                 GlassTextField(
                     value = state.name,

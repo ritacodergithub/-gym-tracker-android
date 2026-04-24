@@ -21,7 +21,12 @@ import com.example.e_commerce.ui.screens.settings.SettingsViewModel
 object AppViewModelProvider {
 
     val Factory: ViewModelProvider.Factory = viewModelFactory {
-        initializer { OnboardingViewModel(app().userProfileRepository) }
+        initializer {
+            OnboardingViewModel(
+                profileRepository = app().userProfileRepository,
+                authRepository = app().authRepository
+            )
+        }
         initializer {
             DashboardViewModel(
                 workoutRepository = app().workoutRepository,

@@ -2,6 +2,7 @@ package com.example.e_commerce
 
 import android.app.Application
 import com.example.e_commerce.data.local.GymDatabase
+import com.example.e_commerce.data.auth.AuthRepository
 import com.example.e_commerce.data.repository.AiCoachRepository
 import com.example.e_commerce.data.repository.BodyWeightRepository
 import com.example.e_commerce.data.repository.UserProfileRepository
@@ -36,4 +37,6 @@ class GymApp : Application() {
     }
 
     val aiCoachRepository: AiCoachRepository by lazy { AiCoachRepository() }
+
+    val authRepository: AuthRepository by lazy { AuthRepository() }
 }

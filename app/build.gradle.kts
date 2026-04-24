@@ -3,6 +3,15 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose) // Compose compiler plugin (Kotlin 2.x)
     alias(libs.plugins.ksp)            // Room annotation processor
+    // Google Services — active only when google-services.json exists. The
+    // apply-conditionally block below avoids a hard failure if you haven't
+    // set up Firebase yet.
+}
+
+// Apply google-services only when the config file is present so the build
+// keeps working for devs who haven't wired Firebase yet.
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
 }
 
 android {
@@ -104,6 +113,7 @@ dependencies {
 
     // --- Coroutines ---
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services) // Task.await() for Firebase
 
     // --- Coil (image loading for offline exercise previews) ---
     implementation(libs.coil.compose)
@@ -116,6 +126,14 @@ dependencies {
     implementation(libs.retrofit.moshi)
     implementation(libs.moshi.kotlin)
     implementation(libs.okhttp.logging)
+
+    // --- Firebase (Auth) + Credential Manager for Google Sign-In ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.analytics.ktx)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.google.id)
 
     // --- Tests ---
     testImplementation(libs.junit)
