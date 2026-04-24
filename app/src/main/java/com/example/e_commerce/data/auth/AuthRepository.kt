@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -80,9 +82,19 @@ class AuthRepository {
             } else {
                 Outcome.Error("Unsupported credential type")
             }
-        } catch (_: GetCredentialException) {
-            // User tapped away or no eligible accounts.
+        } catch (_: GetCredentialCancellationException) {
             Outcome.Cancelled
+        } catch (_: NoCredentialException) {
+            // Most common cause: SHA-1 not registered in Firebase project,
+            // or no Google accounts on the device.
+            Outcome.Error(
+                "No matching Google account found. Check that your app's SHA-1 " +
+                    "is added in Firebase project settings and that you're signed " +
+                    "into a Google account on this device."
+            )
+        } catch (e: GetCredentialException) {
+            // Other credential errors (network, Play Services too old, etc.)
+            Outcome.Error("Credential Manager error: ${e.javaClass.simpleName} — ${e.message ?: "unknown"}")
         } catch (_: GoogleIdTokenParsingException) {
             Outcome.Error("Invalid Google ID token")
         } catch (t: Throwable) {
