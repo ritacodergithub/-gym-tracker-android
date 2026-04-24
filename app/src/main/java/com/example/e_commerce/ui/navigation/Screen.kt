@@ -16,6 +16,7 @@ sealed class Screen(val route: String) {
     data object Library : Screen("library")
     data object BodyWeight : Screen("body_weight")
     data object Routines : Screen("routines")
+    data object AiCoach : Screen("ai_coach")
 
     // Bottom-nav tab routes — inside HomeScreen's inner NavHost.
     data object DashboardTab : Screen("tab_dashboard")

@@ -59,6 +59,7 @@ fun DashboardScreen(
     onOpenRoutines: () -> Unit,
     onOpenLibrary: () -> Unit,
     onOpenBodyWeight: () -> Unit,
+    onOpenAiCoach: () -> Unit = {},
     viewModel: DashboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -81,7 +82,8 @@ fun DashboardScreen(
             QuickActionsRow(
                 onRoutines = onOpenRoutines,
                 onLibrary = onOpenLibrary,
-                onBodyWeight = onOpenBodyWeight
+                onBodyWeight = onOpenBodyWeight,
+                onAiCoach = onOpenAiCoach
             )
         }
 
@@ -263,12 +265,14 @@ private fun TodayGlassCard(todayWorkouts: List<Workout>, modifier: Modifier) {
 private fun QuickActionsRow(
     onRoutines: () -> Unit,
     onLibrary: () -> Unit,
-    onBodyWeight: () -> Unit
+    onBodyWeight: () -> Unit,
+    onAiCoach: () -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         QuickActionChip("Routines", gradient = Gradients.Cool, modifier = Modifier.weight(1f), onClick = onRoutines)
         QuickActionChip("Library", gradient = Gradients.Primary, modifier = Modifier.weight(1f), onClick = onLibrary)
         QuickActionChip("Weigh-in", gradient = Gradients.Lime, modifier = Modifier.weight(1f), onClick = onBodyWeight)
+        QuickActionChip("AI coach", gradient = Gradients.Fire, modifier = Modifier.weight(1f), onClick = onAiCoach)
     }
 }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.e_commerce.GymApp
 import com.example.e_commerce.ui.screens.addworkout.AddWorkoutViewModel
+import com.example.e_commerce.ui.screens.aicoach.AiCoachViewModel
 import com.example.e_commerce.ui.screens.bodyweight.BodyWeightViewModel
 import com.example.e_commerce.ui.screens.dashboard.DashboardViewModel
 import com.example.e_commerce.ui.screens.exerciselibrary.ExerciseLibraryViewModel
@@ -43,6 +44,12 @@ object AppViewModelProvider {
             )
         }
         initializer { RoutinesViewModel() }
+        initializer {
+            AiCoachViewModel(
+                coachRepository = app().aiCoachRepository,
+                profileRepository = app().userProfileRepository
+            )
+        }
         initializer {
             SettingsViewModel(
                 application = app(),

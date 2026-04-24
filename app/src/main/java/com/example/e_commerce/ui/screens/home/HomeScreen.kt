@@ -37,6 +37,7 @@ fun HomeScreen(
     onOpenRoutines: () -> Unit,
     onOpenLibrary: () -> Unit,
     onOpenBodyWeight: () -> Unit,
+    onOpenAiCoach: () -> Unit,
     onResetToOnboarding: () -> Unit
 ) {
     val tabNavController = rememberNavController()
@@ -82,7 +83,8 @@ fun HomeScreen(
                         DashboardScreen(
                             onOpenRoutines = onOpenRoutines,
                             onOpenLibrary = onOpenLibrary,
-                            onOpenBodyWeight = onOpenBodyWeight
+                            onOpenBodyWeight = onOpenBodyWeight,
+                            onOpenAiCoach = onOpenAiCoach
                         )
                     }
                     composable(Screen.HistoryTab.route) { HistoryScreen() }

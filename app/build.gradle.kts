@@ -21,6 +21,24 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+
+        // Read the Gemini API key from local.properties (gitignored) and
+        // expose it as BuildConfig.GEMINI_API_KEY. Fall back to empty so
+        // the app still compiles without a key; the AI screen will show
+        // a friendly "add your key" state in that case.
+        val geminiKey: String = providers
+            .fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+            .asText
+            .map { text ->
+                text.lineSequence()
+                    .firstOrNull { it.startsWith("gemini.api.key=") }
+                    ?.substringAfter("=")
+                    ?.trim()
+                    ?: ""
+            }
+            .orElse("")
+            .get()
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
     }
 
     buildTypes {
@@ -35,6 +53,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -91,6 +110,12 @@ dependencies {
 
     // --- WorkManager (daily reminder) ---
     implementation(libs.androidx.work.runtime.ktx)
+
+    // --- Retrofit + Moshi + OkHttp logging (AI coach) ---
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.okhttp.logging)
 
     // --- Tests ---
     testImplementation(libs.junit)

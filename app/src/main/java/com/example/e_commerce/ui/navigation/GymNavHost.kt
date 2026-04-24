@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.e_commerce.ui.screens.addworkout.AddWorkoutScreen
+import com.example.e_commerce.ui.screens.aicoach.AiCoachScreen
 import com.example.e_commerce.ui.screens.bodyweight.BodyWeightScreen
 import com.example.e_commerce.ui.screens.exerciselibrary.ExerciseLibraryScreen
 import com.example.e_commerce.ui.screens.home.HomeScreen
@@ -41,6 +42,7 @@ fun GymNavHost(
                 onOpenRoutines = { navController.navigate(Screen.Routines.route) },
                 onOpenLibrary = { navController.navigate(Screen.Library.route) },
                 onOpenBodyWeight = { navController.navigate(Screen.BodyWeight.route) },
+                onOpenAiCoach = { navController.navigate(Screen.AiCoach.route) },
                 onResetToOnboarding = {
                     navController.navigate(Screen.Onboarding.route) {
                         popUpTo(0) { inclusive = true }
@@ -80,6 +82,10 @@ fun GymNavHost(
 
         composable(Screen.Routines.route) {
             RoutinesScreen()
+        }
+
+        composable(Screen.AiCoach.route) {
+            AiCoachScreen(onBack = { navController.popBackStack() })
         }
     }
 }

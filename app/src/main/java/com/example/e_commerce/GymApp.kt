@@ -2,6 +2,7 @@ package com.example.e_commerce
 
 import android.app.Application
 import com.example.e_commerce.data.local.GymDatabase
+import com.example.e_commerce.data.repository.AiCoachRepository
 import com.example.e_commerce.data.repository.BodyWeightRepository
 import com.example.e_commerce.data.repository.UserProfileRepository
 import com.example.e_commerce.data.repository.WorkoutRepository
@@ -33,4 +34,6 @@ class GymApp : Application() {
     val userProfileRepository: UserProfileRepository by lazy {
         UserProfileRepository(database.userProfileDao())
     }
+
+    val aiCoachRepository: AiCoachRepository by lazy { AiCoachRepository() }
 }
