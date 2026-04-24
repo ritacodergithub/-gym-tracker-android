@@ -8,6 +8,7 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.FirebaseAuth
@@ -53,21 +54,49 @@ class AuthRepository {
         awaitClose { auth.removeAuthStateListener(listener) }
     }
 
+    // Two-tier flow:
+    //   1. Try GetGoogleIdOption (silent one-tap). Works instantly if the
+    //      user previously signed in or has one Google account.
+    //   2. If that returns NoCredentialException, fall back to
+    //      GetSignInWithGoogleOption — the explicit "Sign in with Google"
+    //      button flow that always shows an account picker, even on
+    //      first launch with no authorized accounts.
     suspend fun signInWithGoogle(context: Context): Outcome {
         if (webClientId.isBlank()) return Outcome.NotConfigured
 
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(webClientId)
-            .setAutoSelectEnabled(true)
-            .build()
-
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-
         val credentialManager = CredentialManager.create(context)
 
+        // Attempt 1 — silent
+        val silentRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(
+                GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(webClientId)
+                    .setAutoSelectEnabled(true)
+                    .build()
+            )
+            .build()
+
+        val silentAttempt = runGoogleFlow(context, credentialManager, silentRequest)
+        if (silentAttempt !is Outcome.Error || !silentAttempt.isNoCredential()) {
+            return silentAttempt
+        }
+
+        // Attempt 2 — explicit button
+        val explicitRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(
+                GetSignInWithGoogleOption.Builder(webClientId).build()
+            )
+            .build()
+
+        return runGoogleFlow(context, credentialManager, explicitRequest)
+    }
+
+    private suspend fun runGoogleFlow(
+        context: Context,
+        credentialManager: CredentialManager,
+        request: GetCredentialRequest
+    ): Outcome {
         return try {
             val response = credentialManager.getCredential(context, request)
             val credential = response.credential
@@ -85,15 +114,11 @@ class AuthRepository {
         } catch (_: GetCredentialCancellationException) {
             Outcome.Cancelled
         } catch (_: NoCredentialException) {
-            // Most common cause: SHA-1 not registered in Firebase project,
-            // or no Google accounts on the device.
             Outcome.Error(
-                "No matching Google account found. Check that your app's SHA-1 " +
-                    "is added in Firebase project settings and that you're signed " +
-                    "into a Google account on this device."
+                "No Google account found on this device. Add one via Settings → Accounts, then try again. " +
+                    "(If you're on an emulator, use one with Google Play Services and sign into a Google account first.)"
             )
         } catch (e: GetCredentialException) {
-            // Other credential errors (network, Play Services too old, etc.)
             Outcome.Error("Credential Manager error: ${e.javaClass.simpleName} — ${e.message ?: "unknown"}")
         } catch (_: GoogleIdTokenParsingException) {
             Outcome.Error("Invalid Google ID token")
@@ -101,6 +126,9 @@ class AuthRepository {
             Outcome.Error(t.message ?: "Sign-in failed")
         }
     }
+
+    private fun Outcome.Error.isNoCredential(): Boolean =
+        message.startsWith("No Google account found")
 
     suspend fun signOut() {
         auth.signOut()
