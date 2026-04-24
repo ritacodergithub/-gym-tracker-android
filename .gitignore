@@ -17,3 +17,11 @@ Thumbs.db
 *.jks
 *.keystore
 keystore.properties
+
+# Firebase client config — contains project API key. Not strictly secret
+# (it ships in the APK), but publishing it on a public repo invites quota
+# abuse. Each contributor should drop in their own.
+app/google-services.json
+# Some Gradle setups copy it here during build; ignore that too.
+app/build/google-services.json
+google-services.json
