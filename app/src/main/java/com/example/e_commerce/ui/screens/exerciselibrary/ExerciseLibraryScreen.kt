@@ -40,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,7 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.e_commerce.data.catalog.Exercise
 import com.example.e_commerce.data.local.ExerciseCategory
 import com.example.e_commerce.ui.AppViewModelProvider
-import com.example.e_commerce.ui.components.launchExerciseVideo
+import com.example.e_commerce.ui.components.ExercisePreviewSheet
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -60,8 +59,10 @@ fun ExerciseLibraryScreen(
     viewModel: ExerciseLibraryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     var detail by remember { mutableStateOf<Exercise?>(null) }
+    // Sibling state so the preview sheet layers on top of the detail sheet
+    // rather than nesting inside it — cleaner z-order.
+    var previewFor by remember { mutableStateOf<Exercise?>(null) }
 
     Scaffold(
         topBar = {
@@ -139,10 +140,17 @@ fun ExerciseLibraryScreen(
                     onPick?.invoke(picked)
                 },
                 onWatchVideo = {
-                    detail?.let { launchExerciseVideo(context, it) }
+                    previewFor = detail
                 }
             )
         }
+    }
+
+    if (previewFor != null) {
+        ExercisePreviewSheet(
+            exercise = previewFor!!,
+            onDismiss = { previewFor = null }
+        )
     }
 }
 

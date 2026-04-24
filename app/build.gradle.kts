@@ -86,6 +86,9 @@ dependencies {
     // --- Coroutines ---
     implementation(libs.kotlinx.coroutines.android)
 
+    // --- Coil (image loading for offline exercise previews) ---
+    implementation(libs.coil.compose)
+
     // --- Tests ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
