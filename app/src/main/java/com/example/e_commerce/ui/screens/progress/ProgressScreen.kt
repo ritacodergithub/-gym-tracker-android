@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.drawText
 import com.example.e_commerce.ui.AppViewModelProvider
 import com.example.e_commerce.ui.components.GlassCard
 import com.example.e_commerce.ui.theme.Gradients

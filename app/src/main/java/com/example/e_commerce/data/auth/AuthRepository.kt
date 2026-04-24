@@ -28,10 +28,10 @@ import kotlinx.coroutines.tasks.await
 //      paste it below as WEB_CLIENT_ID
 class AuthRepository {
 
-    // Replace with your OAuth 2.0 Web client ID. Left blank by default so
-    // the app still runs — the repo returns `NotConfigured` and the UI
-    // shows a friendly setup hint instead of crashing.
-    private val webClientId: String = ""
+    // OAuth 2.0 Web Client ID from Firebase's auto-generated Web client.
+    // Lives in google-services.json under oauth_client[client_type=3].
+    private val webClientId: String =
+        "977271579452-g3qjumcipduooagg3gclviqf8ju5muhu.apps.googleusercontent.com"
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
