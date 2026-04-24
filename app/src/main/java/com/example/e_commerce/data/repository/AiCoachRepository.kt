@@ -82,6 +82,7 @@ class AiCoachRepository {
             else Outcome.Success(text)
         } catch (http: retrofit2.HttpException) {
             val message = when (http.code()) {
+                404 -> "Model not found (404). The model name in GeminiApi.kt may not be available for your account/region — try 'gemini-1.5-flash' or 'gemini-2.0-flash'."
                 429 -> "Free-tier rate limit. This usually clears in 60 seconds — if it keeps happening, you may have hit today's daily quota. Try again tomorrow or add billing in Google AI Studio."
                 400 -> "Bad request (400). Often means the prompt or API version is off."
                 401, 403 -> "Key rejected (${http.code()}). Check that your Gemini key is active in AI Studio."
