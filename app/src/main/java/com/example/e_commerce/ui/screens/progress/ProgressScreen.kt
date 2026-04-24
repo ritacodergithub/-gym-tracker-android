@@ -4,30 +4,37 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.drawText
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import com.example.e_commerce.ui.AppViewModelProvider
+import com.example.e_commerce.ui.components.GlassCard
+import com.example.e_commerce.ui.theme.Gradients
+import com.example.e_commerce.ui.theme.NeonCyan
+import com.example.e_commerce.ui.theme.NeonLime
+import com.example.e_commerce.ui.theme.StrokeSubtle
+import com.example.e_commerce.ui.theme.TextSecondary
 
 @Composable
 fun ProgressScreen(
@@ -35,44 +42,89 @@ fun ProgressScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Your progress", style = MaterialTheme.typography.headlineMedium)
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(
-                title = "Workouts",
-                value = state.totalWorkouts.toString(),
-                suffix = "last 7d",
-                modifier = Modifier.weight(1f)
+        item {
+            Text(
+                "Progress",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
             )
-            StatCard(
-                title = "Volume",
-                value = formatVolume(state.totalVolume),
-                suffix = "kg lifted",
-                modifier = Modifier.weight(1f)
+            Text(
+                "Last 7 days",
+                style = MaterialTheme.typography.labelLarge,
+                color = TextSecondary
             )
         }
 
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text(
-                    "Daily volume (kg)",
-                    style = MaterialTheme.typography.titleLarge
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                StatGlass(
+                    label = "WORKOUTS",
+                    value = state.totalWorkouts.toString(),
+                    accentColor = NeonCyan,
+                    modifier = Modifier.weight(1f)
                 )
-                Spacer(Modifier.height(12.dp))
-                WeeklyBarChart(
-                    bars = state.last7Days,
-                    barColor = MaterialTheme.colorScheme.primary,
-                    labelColor = MaterialTheme.colorScheme.onSurface
+                StatGlass(
+                    label = "VOLUME",
+                    value = formatVolume(state.totalVolume),
+                    accentColor = NeonLime,
+                    unit = "kg lifted",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        item {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(20.dp)) {
+                    Text(
+                        "Daily volume",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    WeeklyBarChart(bars = state.last7Days, barBrush = Gradients.Primary)
+                }
+            }
+        }
+
+        item { Spacer(Modifier.height(96.dp)) }
+    }
+}
+
+@Composable
+private fun StatGlass(
+    label: String,
+    value: String,
+    accentColor: androidx.compose.ui.graphics.Color,
+    unit: String = "",
+    modifier: Modifier = Modifier
+) {
+    GlassCard(modifier = modifier) {
+        Column(Modifier.padding(18.dp)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = accentColor,
+                letterSpacing = 2.sp
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                value,
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (unit.isNotBlank()) {
+                Text(
+                    unit,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = TextSecondary
                 )
             }
         }
@@ -80,58 +132,25 @@ fun ProgressScreen(
 }
 
 @Composable
-private fun StatCard(
-    title: String,
-    value: String,
-    suffix: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        modifier = modifier
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(title, style = MaterialTheme.typography.labelLarge)
-            Text(
-                value,
-                style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                suffix,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-    }
-}
-
-// Hand-rolled bar chart. Avoids an extra dependency for an MVP visualization;
-// swap for a library like Vico once you need stacked bars / tooltips / zoom.
-@Composable
 private fun WeeklyBarChart(
     bars: List<ProgressViewModel.DailyVolume>,
-    barColor: Color,
-    labelColor: Color
+    barBrush: Brush
 ) {
     val maxVolume = (bars.maxOfOrNull { it.volume } ?: 0f).coerceAtLeast(1f)
     val textStyle = MaterialTheme.typography.labelLarge
+    val labelColor = MaterialTheme.colorScheme.onSurface
     val textMeasurer = androidx.compose.ui.text.rememberTextMeasurer()
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .height(200.dp)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             if (bars.isEmpty()) return@Canvas
-
-            val chartHeight = size.height - 32f // reserve space for day labels
+            val chartHeight = size.height - 36f
             val slotWidth = size.width / bars.size
-            val barWidth = slotWidth * 0.55f
+            val barWidth = slotWidth * 0.6f
 
             bars.forEachIndexed { i, bar ->
                 val barHeight = (bar.volume / maxVolume) * chartHeight
@@ -139,14 +158,13 @@ private fun WeeklyBarChart(
                 val top = chartHeight - barHeight
 
                 drawRoundRect(
-                    color = barColor,
+                    brush = barBrush,
                     topLeft = Offset(left, top),
-                    size = Size(barWidth, barHeight.coerceAtLeast(2f)),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(6f, 6f),
-                    style = if (bar.volume == 0f) Stroke(width = 2f) else androidx.compose.ui.graphics.drawscope.Fill
+                    size = Size(barWidth, barHeight.coerceAtLeast(4f)),
+                    cornerRadius = CornerRadius(10f, 10f),
+                    style = if (bar.volume == 0f) Stroke(width = 2f) else Fill
                 )
 
-                // Day label beneath the bar.
                 val measured = textMeasurer.measure(
                     text = androidx.compose.ui.text.AnnotatedString(bar.dayLabel),
                     style = textStyle.copy(color = labelColor)
@@ -155,10 +173,18 @@ private fun WeeklyBarChart(
                     textLayoutResult = measured,
                     topLeft = Offset(
                         x = slotWidth * i + (slotWidth - measured.size.width) / 2,
-                        y = chartHeight + 8f
+                        y = chartHeight + 10f
                     )
                 )
             }
+
+            // Axis line.
+            drawLine(
+                color = StrokeSubtle,
+                start = Offset(0f, chartHeight),
+                end = Offset(size.width, chartHeight),
+                strokeWidth = 1f
+            )
         }
     }
 }

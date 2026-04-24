@@ -4,28 +4,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +39,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.e_commerce.data.local.Goal
 import com.example.e_commerce.data.local.WeightUnit
 import com.example.e_commerce.ui.AppViewModelProvider
+import com.example.e_commerce.ui.components.GlassCard
+import com.example.e_commerce.ui.components.GradientButton
+import com.example.e_commerce.ui.theme.Gradients
+import com.example.e_commerce.ui.theme.NeonCyan
+import com.example.e_commerce.ui.theme.NeonIndigo
+import com.example.e_commerce.ui.theme.NeonLime
+import com.example.e_commerce.ui.theme.NeonRose
+import com.example.e_commerce.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -50,62 +57,104 @@ fun SettingsScreen(
     val profile by viewModel.profile.collectAsStateWithLifecycle()
     var showResetDialog by remember { mutableStateOf(false) }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Settings") }) }) { inner ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(inner)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            profile?.let { p ->
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item {
+            Text(
+                "Settings",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        profile?.let { p ->
+            item {
                 SectionCard("Profile") {
-                    Text(p.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        p.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     if (p.email.isNotBlank()) {
-                        Text(p.email, style = MaterialTheme.typography.labelLarge)
+                        Text(p.email, style = MaterialTheme.typography.labelLarge, color = TextSecondary)
                     }
                     Text(
                         "Starting weight: ${p.weightUnit.format(p.startingWeightKg)}",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
+                        color = TextSecondary
                     )
                 }
-
+            }
+            item {
                 SectionCard("Units") {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         WeightUnit.entries.forEach { u ->
                             FilterChip(
                                 selected = p.weightUnit == u,
                                 onClick = { viewModel.updateUnit(u) },
-                                label = { Text(u.label.uppercase()) }
+                                label = { Text(u.label.uppercase()) },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = Color(0x1FFFFFFF),
+                                    labelColor = TextSecondary,
+                                    selectedContainerColor = NeonIndigo,
+                                    selectedLabelColor = Color.White
+                                )
                             )
                         }
                     }
                 }
-
+            }
+            item {
                 SectionCard("Goal") {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Goal.entries.forEach { g ->
                             FilterChip(
                                 selected = p.goal == g,
                                 onClick = { viewModel.updateGoal(g) },
-                                label = { Text(g.label) }
+                                label = { Text(g.label) },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = Color(0x1FFFFFFF),
+                                    labelColor = TextSecondary,
+                                    selectedContainerColor = NeonIndigo,
+                                    selectedLabelColor = Color.White
+                                )
                             )
                         }
                     }
                 }
-
+            }
+            item {
                 SectionCard("Daily reminder") {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Nudge me at", modifier = Modifier.weight(1f))
+                        Text(
+                            "Nudge me every day",
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                         Switch(
                             checked = p.reminderEnabled,
-                            onCheckedChange = { viewModel.updateReminder(it, p.reminderHour) }
+                            onCheckedChange = { viewModel.updateReminder(it, p.reminderHour) },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = NeonIndigo
+                            )
                         )
                     }
                     if (p.reminderEnabled) {
                         var hour by remember(p.reminderHour) { mutableStateOf(p.reminderHour.toFloat()) }
-                        Text("${hour.toInt()}:00", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            "${hour.toInt()}:00",
+                            style = MaterialTheme.typography.displayMedium,
+                            color = NeonLime,
+                            fontWeight = FontWeight.Bold
+                        )
                         Slider(
                             value = hour,
                             onValueChange = { hour = it },
@@ -115,18 +164,13 @@ fun SettingsScreen(
                             valueRange = 6f..22f,
                             steps = 15
                         )
-                        Text(
-                            "Scheduling uses WorkManager — wire up a ReminderWorker when you're ready.",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-                        )
                     }
                 }
             }
+        }
 
-            Spacer(Modifier.height(8.dp))
-
-            SectionCard("Danger zone") {
+        item {
+            SectionCard("Danger zone", accent = NeonRose) {
                 OutlinedButton(
                     onClick = { viewModel.clearWorkouts() },
                     modifier = Modifier.fillMaxWidth()
@@ -135,15 +179,16 @@ fun SettingsScreen(
                     onClick = { viewModel.clearBodyWeight() },
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Clear body-weight history") }
-                Button(
+                GradientButton(
+                    text = "Reset app (wipe everything)",
                     onClick = { showResetDialog = true },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    ),
+                    gradient = Gradients.Fire,
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("Reset app (clear everything)") }
+                )
             }
         }
+
+        item { Spacer(Modifier.height(96.dp)) }
     }
 
     if (showResetDialog) {
@@ -156,7 +201,7 @@ fun SettingsScreen(
                     showResetDialog = false
                     viewModel.resetEverything()
                     onResetToOnboarding()
-                }) { Text("Reset", color = MaterialTheme.colorScheme.error) }
+                }) { Text("Reset", color = NeonRose) }
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) { Text("Cancel") }
@@ -166,14 +211,19 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SectionCard(title: String, content: @Composable () -> Unit) {
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+private fun SectionCard(
+    title: String,
+    accent: Color = NeonCyan,
+    content: @Composable () -> Unit
+) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                title.uppercase(),
+                style = MaterialTheme.typography.labelLarge,
+                color = accent,
+                fontWeight = FontWeight.Bold
+            )
             content()
         }
     }
