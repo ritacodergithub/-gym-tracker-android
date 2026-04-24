@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Rest timer haptic on completion. -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Daily reminder notifications (runtime-requested on Android 13+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".GymApp"

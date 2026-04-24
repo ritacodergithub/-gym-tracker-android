@@ -45,6 +45,7 @@ object AppViewModelProvider {
         initializer { RoutinesViewModel() }
         initializer {
             SettingsViewModel(
+                application = app(),
                 profileRepository = app().userProfileRepository,
                 workoutRepository = app().workoutRepository,
                 bodyWeightRepository = app().bodyWeightRepository

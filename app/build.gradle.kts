@@ -89,6 +89,9 @@ dependencies {
     // --- Coil (image loading for offline exercise previews) ---
     implementation(libs.coil.compose)
 
+    // --- WorkManager (daily reminder) ---
+    implementation(libs.androidx.work.runtime.ktx)
+
     // --- Tests ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

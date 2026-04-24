@@ -1,5 +1,9 @@
 package com.example.e_commerce.ui.screens.settings
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -56,6 +60,12 @@ fun SettingsScreen(
 ) {
     val profile by viewModel.profile.collectAsStateWithLifecycle()
     var showResetDialog by remember { mutableStateOf(false) }
+
+    // Android 13+ POST_NOTIFICATIONS — requested when the user turns on
+    // the reminder switch. On pre-13, the permission is granted by install.
+    val notificationPermission = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { /* best-effort; no action if denied */ }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -140,7 +150,12 @@ fun SettingsScreen(
                         )
                         Switch(
                             checked = p.reminderEnabled,
-                            onCheckedChange = { viewModel.updateReminder(it, p.reminderHour) },
+                            onCheckedChange = { enabled ->
+                                if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                                viewModel.updateReminder(enabled, p.reminderHour)
+                            },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
                                 checkedTrackColor = NeonIndigo

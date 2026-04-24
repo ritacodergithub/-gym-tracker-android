@@ -22,6 +22,9 @@ coroutines = "1.9.0"
 # Coil (image loading for the offline exercise preview)
 coil = "2.7.0"
 
+# WorkManager (daily reminder scheduling)
+work = "2.9.1"
+
 # Tests
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -64,6 +67,9 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 # ---- Coil ----
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+# ---- WorkManager ----
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 
 # ---- Tests ----
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -1,6 +1,7 @@
 package com.example.e_commerce.ui.screens.settings
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.e_commerce.data.local.Goal
 import com.example.e_commerce.data.local.UserProfileEntity
@@ -8,16 +9,20 @@ import com.example.e_commerce.data.local.WeightUnit
 import com.example.e_commerce.data.repository.BodyWeightRepository
 import com.example.e_commerce.data.repository.UserProfileRepository
 import com.example.e_commerce.data.repository.WorkoutRepository
+import com.example.e_commerce.reminder.ReminderScheduler
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+// AndroidViewModel so we can reach Application context to talk to
+// WorkManager without leaking Activity.
 class SettingsViewModel(
+    application: Application,
     private val profileRepository: UserProfileRepository,
     private val workoutRepository: WorkoutRepository,
     private val bodyWeightRepository: BodyWeightRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     val profile: StateFlow<UserProfileEntity?> = profileRepository.observeProfile()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -32,6 +37,10 @@ class SettingsViewModel(
 
     fun updateReminder(enabled: Boolean, hour: Int) = viewModelScope.launch {
         profileRepository.updateReminder(enabled, hour)
+        // Sync with WorkManager — enable schedules the job, disable cancels it.
+        val ctx = getApplication<Application>()
+        if (enabled) ReminderScheduler.schedule(ctx, hour)
+        else ReminderScheduler.cancel(ctx)
     }
 
     fun clearWorkouts() = viewModelScope.launch { workoutRepository.clear() }
@@ -40,5 +49,6 @@ class SettingsViewModel(
         workoutRepository.clear()
         bodyWeightRepository.clear()
         profileRepository.clear()
+        ReminderScheduler.cancel(getApplication())
     }
 }

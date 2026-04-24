@@ -5,11 +5,20 @@ import com.example.e_commerce.data.local.GymDatabase
 import com.example.e_commerce.data.repository.BodyWeightRepository
 import com.example.e_commerce.data.repository.UserProfileRepository
 import com.example.e_commerce.data.repository.WorkoutRepository
+import com.example.e_commerce.reminder.ReminderWorker
 
 // Application class. Acts as a tiny manual DI container: expose the DB and
 // repositories as `lazy` singletons so ViewModels can grab them via the
 // AppViewModelProvider factory. Swap to Hilt later — same shape + annotations.
 class GymApp : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        // Idempotent — the notification channel must exist before any
+        // reminder posts. Doing it at app start avoids a race on first
+        // WorkManager run.
+        ReminderWorker.ensureChannel(this)
+    }
 
     val database: GymDatabase by lazy { GymDatabase.getInstance(this) }
 
