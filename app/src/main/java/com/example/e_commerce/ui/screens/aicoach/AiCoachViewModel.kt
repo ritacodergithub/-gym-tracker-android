@@ -35,16 +35,34 @@ class AiCoachViewModel(
         local.copy(goal = profile?.goal ?: local.goal)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UiState())
 
+    // Simple 20s cool-down between calls so rapid button taps don't stack
+    // rate-limit errors. If the user hammers, the second tap is a no-op.
+    private var lastCallMs: Long = 0L
+
     fun generateTodaysPlan() = viewModelScope.launch {
+        if (!enforceCooldown()) return@launch
         localState.value = localState.value.copy(loading = true, result = null, error = null)
         val outcome = coachRepository.generateDailyPlan(goal = state.value.goal)
         handle(outcome)
     }
 
     fun generateMotivation(streak: Int, name: String) = viewModelScope.launch {
+        if (!enforceCooldown()) return@launch
         localState.value = localState.value.copy(loading = true, result = null, error = null)
         val outcome = coachRepository.motivationalNudge(streak = streak, name = name)
         handle(outcome)
+    }
+
+    private fun enforceCooldown(): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - lastCallMs < 3_000) {
+            localState.value = localState.value.copy(
+                error = "Hold on a moment — wait a few seconds between requests."
+            )
+            return false
+        }
+        lastCallMs = now
+        return true
     }
 
     private fun handle(outcome: AiCoachRepository.Outcome) {
